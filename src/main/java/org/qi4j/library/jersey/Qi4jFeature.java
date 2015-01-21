@@ -1,13 +1,22 @@
 package org.qi4j.library.jersey;
 
+import java.lang.reflect.Type;
+import javax.inject.Singleton;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import org.glassfish.hk2.api.Factory;
+import org.glassfish.hk2.api.Injectee;
+import org.glassfish.hk2.api.InjectionResolver;
+import org.glassfish.hk2.api.ServiceHandle;
+import org.glassfish.hk2.api.TypeLiteral;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.spi.Container;
 import org.glassfish.jersey.server.spi.ContainerLifecycleListener;
 import org.qi4j.api.activation.ActivationException;
 import org.qi4j.api.activation.PassivationException;
+import org.qi4j.api.injection.scope.Service;
+import org.qi4j.api.injection.scope.Structure;
+import org.qi4j.api.service.NoSuchServiceException;
 import org.qi4j.api.structure.Application;
 import org.qi4j.api.structure.Layer;
 import org.qi4j.api.structure.Module;
@@ -111,9 +120,120 @@ public class Qi4jFeature
                             }
                         }
                     ).to( Layer.class );
+                    bind( new StructureInjectionResolver( application, layerName, moduleName ) )
+                    .to( StructureInjectionResolver.TYPE_LITERAL );
+                    bind( new ServiceInjectionResolver( application, layerName, moduleName ) )
+                    .to( ServiceInjectionResolver.TYPE_LITERAL );
                 }
             }
         );
         return true;
+    }
+
+    @Singleton
+    public static class StructureInjectionResolver
+        implements InjectionResolver<Structure>
+    {
+        public static final TypeLiteral<InjectionResolver<Structure>> TYPE_LITERAL;
+
+        static
+        {
+            TYPE_LITERAL = new TypeLiteral<InjectionResolver<Structure>>()
+            {
+            };
+        }
+        private final Application application;
+        private final String layerName;
+        private final String moduleName;
+
+        public StructureInjectionResolver( Application application, String layerName, String moduleName )
+        {
+            this.application = application;
+            this.layerName = layerName;
+            this.moduleName = moduleName;
+        }
+
+        @Override
+        public Object resolve( Injectee injectee, ServiceHandle<?> root )
+        {
+            Type type = injectee.getRequiredType();
+            if( Application.class.equals( type ) )
+            {
+                return application;
+            }
+            if( Layer.class.equals( type ) )
+            {
+                return application.findLayer( layerName );
+            }
+            if( Module.class.equals( type ) )
+            {
+                return application.findModule( layerName, moduleName );
+            }
+            return null;
+        }
+
+        @Override
+        public boolean isConstructorParameterIndicator()
+        {
+            return false;
+        }
+
+        @Override
+        public boolean isMethodParameterIndicator()
+        {
+            return false;
+        }
+    }
+
+    @Singleton
+    public static class ServiceInjectionResolver
+        implements InjectionResolver<Service>
+    {
+        public static final TypeLiteral<InjectionResolver<Service>> TYPE_LITERAL;
+
+        static
+        {
+            TYPE_LITERAL = new TypeLiteral<InjectionResolver<Service>>()
+            {
+            };
+        }
+        private final Application application;
+        private final String layerName;
+        private final String moduleName;
+
+        public ServiceInjectionResolver( Application application, String layerName, String moduleName )
+        {
+            this.application = application;
+            this.layerName = layerName;
+            this.moduleName = moduleName;
+        }
+
+        @Override
+        public Object resolve( Injectee injectee, ServiceHandle<?> root )
+        {
+            Type type = injectee.getRequiredType();
+            Module module = application.findModule( layerName, moduleName );
+            try
+            {
+                return module.findService( type ).get();
+            }
+            catch( NoSuchServiceException ex )
+            {
+                ex.printStackTrace();
+                return null;
+            }
+        }
+
+        @Override
+        public boolean isConstructorParameterIndicator()
+        {
+            return false;
+        }
+
+        @Override
+        public boolean isMethodParameterIndicator()
+        {
+            return false;
+        }
     }
 }

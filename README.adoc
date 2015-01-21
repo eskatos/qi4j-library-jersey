@@ -6,11 +6,11 @@ Work in progress.
 == DONE
 
 - Activate/Passivate a Qi4j Application alongside a Jersey one
-- Application, Layer and Module injected in Jersey resources with @Inject
+- Application, Layer and Module injected in Jersey resources with @Inject or @Structure
+- Services injected in Jersey resources with @Service
 
 == TODO
 
-- Jersey resources as Transient or Services (enable all Qi4j features on resources)
-- Values (de)serialization
+- Values (de)serialization using an EntityProvider
 - Assert correct "Jersey reload" behaviour
-- @Named support for Layer and Module injections with @Inject
+- Support Qi4j qualifiers on @Service injections (@IdentifiedBy, @Tagged, @HasMetaInfo etc...)
