@@ -1,0 +1,4 @@
+
+= Qi4j Jersey Library
+
+Work in progress.
