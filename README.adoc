@@ -10,7 +10,7 @@ Work in progress.
 
 == TODO
 
-- Assert correct "Jersey reload" behaviour
-- @Structure and @Services injections in Jersey resources
-- Transient or Services as Jersey resources
+- Jersey resources as Transient or Services (enable all Qi4j features on resources)
 - Values (de)serialization
+- Assert correct "Jersey reload" behaviour
+- @Named support for Layer and Module injections with @Inject
