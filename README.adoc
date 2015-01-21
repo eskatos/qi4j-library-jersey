@@ -2,3 +2,15 @@
 = Qi4j Jersey Library
 
 Work in progress.
+
+== DONE
+
+- Activate/Passivate a Qi4j Application alongside a Jersey one
+- Application, Layer and Module injected in Jersey resources with @Inject
+
+== TODO
+
+- Assert correct "Jersey reload" behaviour
+- @Structure and @Services injections in Jersey resources
+- Transient or Services as Jersey resources
+- Values (de)serialization
