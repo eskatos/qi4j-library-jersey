@@ -1,2 +1,7 @@
 .gradle/
 build/
+/.nb-gradle/private/
+/.nb-gradle/
+*.iml
+*.ipr
+*.iws

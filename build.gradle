@@ -1,24 +1,38 @@
+buildscript {
+    repositories { jcenter() }
+    dependencies { classpath 'org.hibernate.build.gradle:gradle-maven-publish-auth:2.0.1' }
+}
 
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
 
+group = 'org.qi4j.library'
+
 repositories {
-    maven { url "https://repository-qi4j.forge.cloudbees.com/release/" }
     jcenter()
 }
 
 dependencies {
-    compile     "org.qi4j.core:org.qi4j.core.bootstrap:2.0"
-    compile     "org.glassfish.jersey.containers:jersey-container-grizzly2-http:2.15"
-
-    runtime     "org.qi4j.core:org.qi4j.core.runtime:2.0"
-    runtime     "org.slf4j:slf4j-simple:1.7.10"
-
-    testCompile "org.qi4j.core:org.qi4j.core.testsupport:2.0"
+    compile     "org.qi4j.core:org.qi4j.core.bootstrap:2.1"
+    compile     "org.glassfish.jersey.containers:jersey-container-grizzly2-http:2.22"
+    runtime     "org.qi4j.core:org.qi4j.core.runtime:2.1"
+    testCompile "org.qi4j.core:org.qi4j.core.testsupport:2.1"
+    testRuntime "org.slf4j:slf4j-simple:1.7.10"
 }
 
 task run(type:JavaExec) {
     main = 'com.example.Main'
-    classpath = sourceSets.main.runtimeClasspath
+    classpath = sourceSets.test.runtimeClasspath
 }
+
+apply plugin: 'maven'
+uploadArchives {
+    dependsOn check
+    repositories.mavenDeployer {
+        snapshotRepository(id: 'apache.snapshots.https', url: 'https://repository.apache.org/content/repositories/snapshots') {
+            authentication(userName: rootProject.hasProperty('uploadUsername') ? rootProject.uploadUsername : null, password: rootProject.hasProperty('uploadPassword') ? rootProject.uploadPassword : null)
+        }
+    }
+}
+apply plugin: 'maven-publish-auth'
